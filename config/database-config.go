@@ -10,7 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupDataBaseConnection() *gorm.DB {
+//SetupDatabaseConnection is creating a new connection to our database
+func SetupDatabaseConnection() *gorm.DB {
 	errEnv := godotenv.Load()
 	if errEnv != nil {
 		panic("Failed to load env file")
@@ -26,10 +27,12 @@ func SetupDataBaseConnection() *gorm.DB {
 	if err != nil {
 		panic("Failed to create a connection to database")
 	}
+	// //nanti kita isi modelnya di sini
 	db.AutoMigrate(&models.Cake{})
 	return db
 }
 
+//CloseDatabaseConnection method is closing a connection between your app and your db
 func CloseDatabaseConnection(db *gorm.DB) {
 	dbSQL, err := db.DB()
 	if err != nil {

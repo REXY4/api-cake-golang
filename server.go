@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -15,7 +16,7 @@ import (
 )
 
 var (
-	db *gorm.DB = config.SetupDataBaseConnection()
+	db *gorm.DB = config.SetupDatabaseConnection()
 )
 
 func main() {
@@ -23,13 +24,15 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	router := gin.Default()
-
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+	router.Static("uploads", "./uploads")
 	handler.NewHandler(&handler.Config{
 		R: router,
 	})
+	port := os.Getenv("PORT")
 
 	srv := &http.Server{
-		Addr:    ":5000",
+		Addr:    `:` + port,
 		Handler: router,
 	}
 	go func() {
