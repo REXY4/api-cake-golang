@@ -1,11 +1,21 @@
-FROM golang:1.17.8-alpine3.15 AS builder
-RUN apk add --no-cache make git
+FROM golang:1.19.1-alpine 
+
 WORKDIR ./app
 
 COPY . .
-RUN git version
-RUN go get github.com/gin-gonic/gin
-RUN go build
+
+COPY go.mod ./
+COPY go.sum ./
+
+RUN echo "export GO111MODULE=on" >> ~/.profile
+RUN echo "export GOPROXY=https://goproxy.cn" >> ~/.profile
+RUN source ~/.profile
+
+RUN go mod download
+
+COPY *.go ./
+
+RUN go build -o /cake
 
 RUN apk add --update tzdata
 ENV TZ=Asia/Jakarta
@@ -17,4 +27,4 @@ ENV DB_NAME=cake
 # USER ${USER}
 EXPOSE 5000
 #RUN  chmod +x docker-entrypoint.sh
-CMD ["go run","server.go"]
+CMD [ "/cake" ]
